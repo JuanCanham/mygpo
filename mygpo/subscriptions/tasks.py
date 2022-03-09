@@ -9,6 +9,7 @@ from mygpo.subscriptions.signals import subscription_changed
 from mygpo.history.models import HistoryEntry
 from mygpo.podcasts.models import Podcast
 from mygpo.utils import to_maxlength
+from mygpo.data.tasks import update_podcasts
 
 import logging
 
@@ -21,6 +22,8 @@ def subscribe(podcast_pk, user_pk, client_uid, ref_url=None):
 
     Takes syned devices into account."""
     podcast = Podcast.objects.get(pk=podcast_pk)
+    if podcast.link is None and ref_url:
+        update_podcasts.delay([ref_url])
 
     User = get_user_model()
     user = User.objects.get(pk=user_pk)
